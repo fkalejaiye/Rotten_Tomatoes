@@ -23,7 +23,6 @@ rating = rotten_tomatoes_db['ratings']
 url_main_page = 'https://www.rottentomatoes.com/browse/dvd-streaming-all/'
 
 def get_urls(x):
-    movie_links = []
     driver = webdriver.Chrome(executable_path='./src/chromedriver')
     driver.get(x)
     time.sleep(15)
@@ -57,11 +56,17 @@ def get_urls(x):
     return links2
     driver.quit()
 
-urls = get_urls(url_main_page)    
+def get_full_urls(x):
+    full_urls = []
+    first_half = 'http://www.rottentomatoes.com'
+    for url in x:
+        full_urls.append(first_half+url)
+    return full_urls
+   
 
 
-def get_info_from_urls(urls)
-    for url in urls:
+def get_info_from_urls(x):
+    for url in x:
 
         r = requests.get(url)
 
@@ -75,9 +80,9 @@ def get_info_from_urls(urls)
         tomatometer = tomatometer.strip('\n').strip().strip('%')
         audience = audience.strip('\n').strip().strip('%')
         date = soup.find('time').text
-        ratings.insert_one({'movie':movie, 'tomatometer':tomatometer, 'audience':audience, 'date':date})
+        rating.insert_one({'movie':movie, 'tomatometer':tomatometer, 'audience':audience, 'date':date})
 
-        time(5)
+        time(10)
 
 if __name__ == '__main__':
 	#run scraper and print completion time
