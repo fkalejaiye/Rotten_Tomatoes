@@ -4,24 +4,60 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import pprint
+import time
+import json
+from contextlib import contextmanager
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import ElementNotVisibleException
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException
+import re
 
 client = MongoClient()
 rotten_tomatoes_db=client['rotten_tomatoes']
 rating = rotten_tomatoes_db['ratings']
 
-url_main = 'https://www.rottentomatoes.com/browse/dvd-streaming-all/'
-urls=[]
+url_main_page = 'https://www.rottentomatoes.com/browse/dvd-streaming-all/'
 
-def get_urls(url_main):
-
-    q = requests.get(url_main)
- 
-    soup = BeautifulSoup(r.text,'html.parser')
-
-    link = soup.find()
-    for tag in link:
-        urls.append(tag.text)
+def get_urls(x):
+    movie_links = []
+    driver = webdriver.Chrome(executable_path='./src/chromedriver')
+    driver.get(x)
+    time.sleep(15)
+    show_more_button = driver.find_element_by_class_name("btn.btn-secondary-rt.mb-load-btn")
     
+    while(True):
+           
+        try:
+            show_more_button.click()
+            time.sleep(2)
+            
+        except ElementNotVisibleException:
+            break
+        except TimeoutException:
+            break
+        except StaleElementReferenceException:
+            break
+        
+        
+    #record each movie title and its url inside dict
+    soup = BeautifulSoup(driver.page_source,"lxml")
+    links=[]
+    for link in soup.findAll('a', attrs={'href': re.compile("/m/")}):
+        links.append(link.get('href'))
+    links2=[]
+    for link in links:
+        if link not in links2:
+            links2.append(link)
+    #movies = soup.find_all('h3', {'class' :"movieTitle"})
+    #movies= [movie.text for movie in movies]
+    return links2
+    driver.quit()
+
+urls = get_urls(url_main_page)    
 
 
 def get_info_from_urls(urls)
