@@ -8,5 +8,22 @@ rating = db['ratings']
 ratings_df = pd.DataFrame(list(rating.find()))
 ratings_df = ratings_df.iloc[:,1:]
 
-df['tomatometer']=[int(rating) for rating in df['tomatometer']]
-df['audience']=[int(rating) for rating in df['audience']]
+ratings_df['tomatometer']=[int(rating) for rating in ratings_df['tomatometer']]
+ratings_df['audience']=[int(rating) for rating in ratings_df['audience']]
+audience_opinions=[]
+critic_opinions=[]
+def get_fresh_and_rotten():
+    for value in ratings_df['audience']:
+        if value>=60:
+            audience_opinions.append('Fresh')
+        elif value<60:
+            audience_opinions.append('Rotten')
+    for value in ratings_df['tomatometer']:
+        if value>=60:
+            critic_opinions.append('Fresh')
+        elif value<60:
+            critic_opinions.append('Rotten')
+
+get_fresh_and_rotten()
+ratings_df['audience_tomatometer'] = audience_opinions
+ratings_df['critic_tomatometer'] = critic_opinions
