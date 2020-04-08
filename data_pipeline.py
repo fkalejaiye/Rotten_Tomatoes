@@ -27,3 +27,4 @@ def get_fresh_and_rotten():
 get_fresh_and_rotten()
 ratings_df['audience_tomatometer'] = audience_opinions
 ratings_df['critic_tomatometer'] = critic_opinions
+ratings_df.rename(columns={'tomatometer': 'critic_score', 'date': 'release_date','audience': 'audience_score'},inplace=True)
