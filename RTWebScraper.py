@@ -19,6 +19,7 @@ import re
 client = MongoClient()
 rotten_tomatoes_db=client['rotten_tomatoes']
 rating = rotten_tomatoes_db['ratings']
+urls = rotten_tomatoes_db['urls']
 
 main_urls = 'https://www.rottentomatoes.com/browse/dvd-streaming-all/'
 
@@ -51,8 +52,9 @@ def get_urls(x):
     for link in links:
         if (first_half+link) not in links2:
             links2.append(first_half+link)
+            urls.insert_one({'link': first_half+link})
     driver.quit()
-    return links2
+    print("Done!")
    
 
 
@@ -84,7 +86,11 @@ def get_info_from_urls(x):
 
         time.sleep(10)
 
-websites = get_urls(main_urls)
+#get_urls(main_urls)
+
+num_scraped = urls.count_documents({})
+
+websites = [urls.find()[i]['link'] for i in range(length_)]
 
 get_info_from_urls(websites)
 
