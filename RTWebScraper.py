@@ -54,12 +54,13 @@ def get_urls(x):
             links2.append(first_half+link)
             urls.insert_one({'link': first_half+link})
     driver.quit()
-    print("Done!")
+    print("Done Getting Links!")
    
 
 
 def get_info_from_urls(x):
     p=0
+    p2=0
     for url in x:
         
         r = requests.get(url)
@@ -75,7 +76,8 @@ def get_info_from_urls(x):
                 date = soup.find('time').text
                 rating.insert_one({'movie':movie, 'tomatometer':tomatometer, 'audience':audience, 'date':date})
                 p+=1
-                print(f"Added '{movie}' to Database. {p} movies have been added ({(p/len(x))*100}% done.).")
+                p2+=1
+                print(f"Added '{movie}' to Database. {p2} movies have been added ({(p/len(x))*100}% done.).")
             
             else: 
                 continue
@@ -86,12 +88,13 @@ def get_info_from_urls(x):
 
         time.sleep(10)
 
-#get_urls(main_urls)
+get_urls(main_urls)
 
 num_scraped = urls.count_documents({})
 
 websites = [urls.find()[i]['link'] for i in range(length_)]
 
+# Use this if the internet crashes so you can pick up where you left off: get_info_from_urls(websites[count_at_failure])
 get_info_from_urls(websites)
 
 
