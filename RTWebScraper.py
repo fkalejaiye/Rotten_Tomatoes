@@ -20,48 +20,48 @@ client = MongoClient()
 rotten_tomatoes_db=client['rotten_tomatoes']
 rating = rotten_tomatoes_db['ratings']
 
-url_main_page = 'https://www.rottentomatoes.com/browse/dvd-streaming-all/'
+score_ranges = [0,10,20,30,40,50,60,70,80,90]
+main_urls=[f'https://www.rottentomatoes.com/browse/dvd-streaming-all?minTomato={x}&maxTomato={x+10}&services=amazon;hbo_go;itunes;netflix_iw;vudu;amazon_prime;fandango_now&genres=1;2;4;5;6;8;9;10;11;13;18;14&sortBy=release' for x in score_ranges]
 
 def get_urls(x):
-    driver = webdriver.Chrome(executable_path='./src/chromedriver')
-    driver.get(x)
-    time.sleep(15)
-    show_more_button = driver.find_element_by_class_name("btn.btn-secondary-rt.mb-load-btn")
-    
-    while(True):
-           
-        try:
-            show_more_button.click()
-            time.sleep(2)
-            
-        except ElementNotVisibleException:
-            break
-        except TimeoutException:
-            break
-        except StaleElementReferenceException:
-            break
-        
-        
-    #record each movie title and its url inside dict
-    soup = BeautifulSoup(driver.page_source,"lxml")
     links=[]
-    for link in soup.findAll('a', attrs={'href': re.compile("/m/")}):
-        links.append(link.get('href'))
     links2=[]
-    for link in links:
-        if link not in links2:
-            links2.append(link)
-    #movies = soup.find_all('h3', {'class' :"movieTitle"})
-    #movies= [movie.text for movie in movies]
-    return links2
-    driver.quit()
-
-def get_full_urls(x):
-    full_urls = []
     first_half = 'http://www.rottentomatoes.com'
     for url in x:
-        full_urls.append(first_half+url)
-    return full_urls
+        count=0
+        clicks=0
+        driver = webdriver.Chrome(executable_path='./src/chromedriver')
+        driver.get(url)
+        time.sleep(15)
+        show_more_button = driver.find_element_by_class_name("btn.btn-secondary-rt.mb-load-btn")
+    
+        while(clicks<4):
+           
+            try:
+                show_more_button.click()
+                time.sleep(2)
+                clicks+=1
+            
+            except ElementNotVisibleException:
+                break
+            except TimeoutException:
+                break
+            except StaleElementReferenceException:
+                break
+        
+        
+        soup = BeautifulSoup(driver.page_source,"lxml")
+        for link in soup.findAll('a', attrs={'href': re.compile("/m/")}):
+            if count<203:
+                links.append(link.get('href'))
+                count+=1
+            elif count>=203:
+                break
+        for link in links:
+            if (first_half+link) not in links2:
+                links2.append(first_half+link)
+        driver.quit()
+    return links2
    
 
 
@@ -87,6 +87,8 @@ def get_info_from_urls(x):
             else: 
                 continue
         else:
+            print("Failed to get page")
+            p+=1
             continue
 
         time.sleep(10)
