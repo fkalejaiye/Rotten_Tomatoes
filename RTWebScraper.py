@@ -66,23 +66,30 @@ def get_full_urls(x):
 
 
 def get_info_from_urls(x):
+    p=0
     for url in x:
-
+        
         r = requests.get(url)
+        if r.status_code ==200:
+            soup = BeautifulSoup(r.text, 'html.parser')
 
-        whole_page= rotten_tomatoes_db['whole_page']
-        whole_page.insert_one({'html': r.content, 'url':url, 'time_scraped':time.time()})
+            movie = soup.find('h1', class_="mop-ratings-wrap__title mop-ratings-wrap__title--top").text
+            rating_tags = soup.find_all('span', class_="mop-ratings-wrap__percentage")
+            if len(rating_tags)==2:
+                tomatometer,audience = [i for i in rating_tags]
+                tomatometer = tomatometer.text.strip('\n').strip().strip('%')
+                audience = audience.text.strip('\n').strip().strip('%')
+                date = soup.find('time').text
+                rating.insert_one({'movie':movie, 'tomatometer':tomatometer, 'audience':audience, 'date':date})
+                p+=1
+                print(f"Added {movie} to Database ({(p/len(x))*100}% done.)")
+            
+            else: 
+                continue
+        else:
+            continue
 
-        soup = BeautifulSoup(r.text, 'html.parser')
-
-        movie = soup.find('h1', class_="mop-ratings-wrap__title mop-ratings-wrap__title--top").text
-        tomatometer,audience = [i for i in soup.find_all('span', class_="mop-ratings-wrap__percentage")]
-        tomatometer = tomatometer.strip('\n').strip().strip('%')
-        audience = audience.strip('\n').strip().strip('%')
-        date = soup.find('time').text
-        rating.insert_one({'movie':movie, 'tomatometer':tomatometer, 'audience':audience, 'date':date})
-
-        time(10)
+        time.sleep(10)
 
 if __name__ == '__main__':
 	#run scraper and print completion time
