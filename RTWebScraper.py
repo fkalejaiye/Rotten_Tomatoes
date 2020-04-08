@@ -93,9 +93,10 @@ def get_info_from_urls(x):
 
         time.sleep(10)
 
-if __name__ == '__main__':
-	#run scraper and print completion time
-	print('Running')
-	start = time.time()
-	end = time.time() - start
-	print("Completed, time: " + str(end) + " secs")
+websites = get_urls(main_urls)
+
+get_info_from_urls(websites)
+
+
+
+print('FINISHED SCRAPING!!!!!!')
