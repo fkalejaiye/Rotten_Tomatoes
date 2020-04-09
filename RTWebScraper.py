@@ -24,11 +24,20 @@ urls = rotten_tomatoes_db['urls']
 main_urls = 'https://www.rottentomatoes.com/browse/dvd-streaming-all/'
 
 def get_urls(x):
+    '''
+        Clicks the show more button on the Rotten Tomatoes Page Until it gets to the bottom and get all the urls for each movie 
+        and store it in a mongo database.
+        
+        Parameters: {x: url of main page on Rotten Tomatoes}
+        Returns: None
+    '''
     links=[]
     links2=[]
     first_half = 'http://www.rottentomatoes.com'
     driver = webdriver.Chrome(executable_path='./src/chromedriver')
     driver.get(x)
+    # In case the page is slow to load and the show more button has not yet appeared, making it sleep gives the page time to
+    #load.
     time.sleep(15)
     show_more_button = driver.find_element_by_class_name("btn.btn-secondary-rt.mb-load-btn")
     
@@ -49,6 +58,8 @@ def get_urls(x):
     soup = BeautifulSoup(driver.page_source,"lxml")
     for link in soup.findAll('a', attrs={'href': re.compile("/m/")}):
         links.append(link.get('href'))
+    #The links for each movie are not the complete links and there are duplicates so the links were added to a new list with
+    #duplicates removed and the first part of the url added for each link.
     for link in links:
         if (first_half+link) not in links2:
             links2.append(first_half+link)
@@ -59,6 +70,15 @@ def get_urls(x):
 
 
 def get_info_from_urls(x):
+    '''
+        Gets the movie name, critic rating, audience rating, and release date for each link passed in and puts it in a mongo
+        database.
+
+        Parameters: {x: A list of movie page urls from Rotten Tomatoes}
+        Returns: None
+    
+    '''
+    #p and p2 are used to keep track of how many movies have been added and what percentage of the movies have been added
     p=0
     p2=0
     for url in x:
@@ -88,14 +108,12 @@ def get_info_from_urls(x):
 
         time.sleep(10)
 
+
+
 get_urls(main_urls)
-
 num_scraped = urls.count_documents({})
-
-websites = [urls.find()[i]['link'] for i in range(num_scraped)]
-
-
-get_info_from_urls(websites)
+#Gets the urls to be scraped that were stored in the mongo database from the get_urls function
+websites = [urls.find()[i]['link'] for i in range(num_scraped)]get_info_from_urls(websites)
 
 
 
