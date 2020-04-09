@@ -94,7 +94,7 @@ num_scraped = urls.count_documents({})
 
 websites = [urls.find()[i]['link'] for i in range(num_scraped)]
 
-# Use this if the internet crashes so you can pick up where you left off: get_info_from_urls(websites[count_at_failure])
+
 get_info_from_urls(websites)
 
 
