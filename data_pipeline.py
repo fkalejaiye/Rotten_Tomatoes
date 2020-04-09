@@ -7,15 +7,19 @@ rating = db['ratings']
 
 def initial_cleaning():
     '''
-        Gets data from mongo and puts it into a database. Casts audience and critic scores from an integer to a string.
+        Gets data from mongo and puts it into a dataframe. Casts audience and critic scores from an integer to a string.
 
         Parameters: None
-        Returns: None
+        Returns: Dataframe
     '''
     ratings_df = pd.DataFrame(list(rating.find()))
     ratings_df = ratings_df.iloc[:,1:]
     ratings_df['tomatometer']=[int(rating) for rating in ratings_df['tomatometer']]
     ratings_df['audience']=[int(rating) for rating in ratings_df['audience']]
+    return ratings_df
+
+ratings_df=initial_cleaning()
+
 
 def get_fresh_and_rotten():
     '''
@@ -40,6 +44,8 @@ def get_fresh_and_rotten():
     ratings_df['audience_tomatometer'] = audience_opinions
     ratings_df['critic_tomatometer'] = critic_opinions
 
+get_fresh_and_rotten()
+
 def create_and_rename_cols():
     '''
         Renames Columns.
@@ -48,6 +54,8 @@ def create_and_rename_cols():
         Returns: None
     '''
     ratings_df.rename(columns={'tomatometer': 'critic_score', 'date': 'release_date','audience': 'audience_score'},inplace=True)
+
+create_and_rename_cols()
 
 def add_score_diff():
     '''
@@ -58,18 +66,17 @@ def add_score_diff():
     ''' 
     ratings_df['score_difference'] = ratings_df['audience_score'] - ratings_df['critic_score']
 
-def drop_duplicates():
+add_score_diff()
+
+def drop_duplicates(ratings_df):
     '''
         Drops duplcates in the dataframe.
 
-        Parameters: None
+        Parameters: dataframe
         Returns: None
     '''
     ratings_df = ratings_df.drop_duplicates().reset_index()
     ratings_df = ratings_df.drop(columns='index')
 
-initial_cleaning()
-get_fresh_and_rotten()
-create_and_rename_cols()
-add_score_diff()
-drop_duplicates()
+
+drop_duplicates(ratings_df)
