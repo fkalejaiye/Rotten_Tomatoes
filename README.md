@@ -59,7 +59,7 @@ Test 2:
 
 >Looking at a histogram of the differences between audience and critic scores reflects this.
 
-
+![](images/score_diff_hist.png)
 
 
 
